@@ -137,15 +137,6 @@ def warpGrid(t, pointsT, dimensions):
     return gridWarpped
     
 '''
-get the remapped coodinates and separate them into their respective x y list. This will be used in for opencv's remap function.
-'''
-def remapCoordinates(gridOriginal, dimensions):
-    rescaleX = (gridOriginal[:, :, 0] * dimensions[1])
-    rescaleX = rescaleX.astype(np.float32)
-    rescaleY = (gridOriginal[:, :, 1] * dimensions[0])
-    rescaleY = rescaleY.astype(np.float32)
-    return rescaleX, rescaleY
-'''
 get the coordinates of source and target and then calculate their change. Then calculate theta for both the x coordinates and y coordinates.
 '''
 def getPointsT(pointsS, pointsT):
@@ -244,16 +235,20 @@ def minMax(listInput):
       xCoor.append(x[0])
   return min(xCoor), max(xCoor)
 
-
 '''
 This function actually warps the image it will calculate theta, then warp the grid or the image, remap the x and y values and then calls cv2.remap to actually remap the image according to how the grid is mapped.
 '''
+
 def warpImage(pointsS, pointsT, originalImg, dimensions):
     t_Final = getPointsT(pointsS, pointsT) #get theta from source points and target points
     warppedGrid = warpGrid(t_Final, pointsT, dimensions)
-    xCoord, yCoord = remapCoordinates(warppedGrid, dimensions)
-    warppedImage = cv2.remap(originalImg, xCoord, yCoord, cv2.INTER_CUBIC)
+    rescale_XCoord = (warppedGrid[:, :, 0] * dimensions[1])
+    rescale_XCoord = rescale_XCoord.astype(np.float32)
+    rescale_YCoord = (warppedGrid[:, :, 1] * dimensions[0])
+    rescale_YCoord = rescale_YCoord.astype(np.float32)
+    warppedImage = cv2.remap(originalImg, rescale_XCoord, rescale_YCoord, cv2.INTER_CUBIC)
     return warppedImage
+
 '''
 Plots the image.
 Top left is the original.
@@ -279,6 +274,7 @@ def plotwarppedImage(img, warpImg, pointsS, pointsT, path):
     axis[1][0].legend()
     axis[1][1].legend()
     plt.show()
+
 '''
 transformation function
 '''
